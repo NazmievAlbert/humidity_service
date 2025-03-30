@@ -6,9 +6,11 @@ from services.weather_service import WeatherService
 from services.calculation import HumidityCalculator
 from services.rate_limiter import RateLimiter
 from models.schemas import HumidityRequest, HumidityResponse
+from flask_cors import CORS
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object(config_class)
     app.json.ensure_ascii = False  # Добавить после создания app
     config = config_class()
