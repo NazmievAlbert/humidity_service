@@ -1,3 +1,7 @@
+import os
+import logging
+from logging.config import dictConfig
+
 class Config:
     WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast"
     WEATHER_API_PARAMS = {
@@ -9,45 +13,54 @@ class Config:
     CACHE_SIZE = 128  # Размер кеша для запросов погоды
     CACHE_TTL = 3600  # 1 час (в секундах)
     COORDINATE_PRECISION: int = 2
+    # Указываем директорию для логов относительно текущего рабочего каталога
+
+    LOG_DIR = 'logs'
+    LOG_FILE = 'cache.log'  # Имя файла логов
+
+    # Полный путь до файла логов
 
 
-# config.py
-import logging
-from logging.config import dictConfig
+    LOG_PATH = os.path.join(LOG_DIR, LOG_FILE)
 
-LOGGING_CONFIG = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "default": {
-            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    LOGGING_CONFIG = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "default": {
+                "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            },
+            "simple": {
+                "format": "%(levelname)s - %(message)s",
+            },
         },
-        "simple": {
-            "format": "%(levelname)s - %(message)s",
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "default",
+                "stream": "ext://sys.stdout",
+            },
+            "file": {
+                "class": "logging.FileHandler",
+                "formatter": "default",
+                "filename": LOG_PATH,  # Теперь используем переменную LOG_PATH
+                "mode": "a",
+            },
         },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "default",
-            "stream": "ext://sys.stdout",
+        "loggers": {
+            "cache_logger": {
+                "handlers": ["console", "file"],
+                "level": "INFO",
+                "propagate": False,
+            },
         },
-        "file": {
-            "class": "logging.FileHandler",
-            "formatter": "default",
-            "filename": "cache.log",  # Логи будут писаться в этот файл
-            "mode": "a",
-        },
-    },
-    "loggers": {
-        "cache_logger": {  # Логгер для кеширования
-            "handlers": ["console", "file"],  # Вывод и в консоль, и в файл
-            "level": "INFO",  # Минимальный уровень логирования
-            "propagate": False,  # Отключаем передачу родительским логгерам
-        },
-    },
-}
+    }
+
+
+# Проверяем существование директории и создаем её, если она отсутствует
+if not os.path.exists(Config.LOG_DIR):
+    os.makedirs(Config.LOG_DIR)
 
 # Инициализация логгера
-dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("cache_logger")  # Используйте этот логгер в коде
+dictConfig(Config.LOGGING_CONFIG)
+logger = logging.getLogger("cache_logger")
