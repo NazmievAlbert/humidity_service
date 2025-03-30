@@ -109,6 +109,22 @@ def create_app(config_class=Config):
         error_logger.warning(f"405 Method Not Allowed: {request.method} {request.url}")
         return jsonify({"error": "Метод не разрешен"}), 405
 
+    @app.route('/')
+    def home():
+        return {
+            "service": "Humidity Calculator",
+            "status": "running",
+            "endpoints": {
+                "calculate": "/calculate_humidity?latitude=X&longitude=Y&target_temp=Z",
+                "healthcheck": "/healthcheck"
+            },
+            "timestamp": datetime.utcnow().isoformat() + "Z"
+        }
+
+    @app.route('/healthcheck')
+    def healthcheck():
+        return {"status": "OK", "timestamp": datetime.utcnow().isoformat() + "Z"}
+
     return app
 
 if __name__ == '__main__':
