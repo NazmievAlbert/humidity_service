@@ -12,11 +12,12 @@ class Config:
     RATE_LIMIT_WINDOW = 60  # 60 секунд
     CACHE_SIZE = 128  # Размер кеша для запросов погоды
     CACHE_TTL = 3600  # 1 час (в секундах)
+    ENABLE_CACHE_LOGGING = False
     COORDINATE_PRECISION: int = 2
     # Указываем директорию для логов относительно текущего рабочего каталога
 
     LOG_DIR = 'logs'
-    LOG_FILE = 'cache.log'  # Имя файла логов
+    LOG_FILE = 'logs.log'  # Имя файла логов
 
     # Полный путь до файла логов
 
@@ -48,14 +49,18 @@ class Config:
             },
         },
         "loggers": {
-            "cache_logger": {
+            "cache_logger": {  # Логгер для кеширования
                 "handlers": ["console", "file"],
                 "level": "INFO",
                 "propagate": False,
             },
+            "error_logger": {  #логгер для ошибок
+                "handlers": ["console", "file"],
+                "level": "ERROR",
+                "propagate": False,
+            },
         },
     }
-
 
 # Проверяем существование директории и создаем её, если она отсутствует
 if not os.path.exists(Config.LOG_DIR):
@@ -63,4 +68,6 @@ if not os.path.exists(Config.LOG_DIR):
 
 # Инициализация логгера
 dictConfig(Config.LOGGING_CONFIG)
-logger = logging.getLogger("cache_logger")
+cache_logger = logging.getLogger("cache_logger")
+error_logger = logging.getLogger("error_logger")
+
