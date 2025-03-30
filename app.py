@@ -10,7 +10,13 @@ from flask_cors import CORS
 
 def create_app(config_class=Config):
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, resources={
+        r"/*": {
+            "origins": "*",
+            "methods": ["GET", "POST"],
+            "allow_headers": ["Content-Type"]
+        }
+    })
     app.config.from_object(config_class)
     app.json.ensure_ascii = False  # Добавить после создания app
     config = config_class()
